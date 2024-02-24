@@ -30,8 +30,5 @@ namespace Auth_API.Controllers
         {
             return Ok(Summaries);
         }
-
-
-
     }
 }
