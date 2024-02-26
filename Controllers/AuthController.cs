@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using Auth_API.Model;
 using Auth_API.Model.Other;
@@ -9,6 +12,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Auth_API.Controllers
 {
@@ -48,7 +52,7 @@ namespace Auth_API.Controllers
 
         }
 
-        //สร้าง endpoint สำหรับการจัดการกับ register 
+        //สร้าง endpoint สำหรับการ register 
         [HttpPost]
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel registerModel)
@@ -57,7 +61,8 @@ namespace Auth_API.Controllers
             var isExistsUser = await _userManager.FindByNameAsync(registerModel.Username);
 
             //TODO_2 ตรวจสอบว่ามีชื่อผู้ใช้นี้อยู่แล้วหรือไม่ 
-            if (isExistsUser != null){
+            if (isExistsUser != null)
+            {
                 return BadRequest("Username Already Exists");
             }
 
@@ -87,6 +92,64 @@ namespace Auth_API.Controllers
             //Setting default "USER" role to new user
             await _userManager.AddToRoleAsync(newUser, UserRoles.USER);
             return Ok("User Created Succesfully");
+        }
+
+        //สร้าง endpoint สำหรับการ login
+        [HttpPost]
+        [Route("login")]
+        public async Task<IActionResult> Login([FromBody] LoginModel loginModel)
+        {
+
+            //TODO_1 ค้นหาผู้ใช้จากชื่อผู้ใช้ที่ส่งมาใน loginModel ด้วย UserManager
+            var userLogin = await _userManager.FindByNameAsync(loginModel.Username);
+
+            //TODO_2 ตรวจสอบว่ามีผู้ใช้ที่เข้าสู่ระบบโดยใช้ชื่อผู้ใช้ที่รับมาหรือไม่
+            if (userLogin is null)
+            {
+                return Unauthorized("Invaild Credentials");
+            }
+
+            //TODO_3 เก็บ role ของผู้ใช้ที่เข้าสู่ระบบได้มาไว้ใน UserRoles เพื่อใช้ในการสร้าง claims ใน token
+            var UserRoles = await _userManager.GetRolesAsync(userLogin);
+
+            //TODO_4 เมื่อได้รับบทบาทของผู้ใช้แล้ว เราก็เริ่มสร้างรายการของประกาศ (claims) ซึ่งจะใช้ในการสร้าง token JWT โดยใส่ข้อมูลต่างๆ เช่น ชื่อผู้ใช้, ไอดีผู้ใช้, และบทบาทลงไป
+            var authClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, userLogin.UserName),
+                new Claim(ClaimTypes.NameIdentifier, userLogin.Id),
+                new Claim("JWTID", Guid.NewGuid().ToString())
+            };
+
+            //TODO_5 เพิ่มข้อมูลบทบาท (Role claims) ลงในรายการของประกาศ (claims) เพื่อให้สามารถนำข้อมูลบทบาทมาใช้ในการสร้าง token JWT 
+            foreach (var userRole in UserRoles)
+            {
+                authClaims.Add(new Claim(ClaimTypes.Role, userRole));
+            }
+
+            //TODO_6 เมื่อเรามีรายการของประกาศ (claims) ที่ครบถ้วนแล้ว เราก็ใช้เมธอด GenerateNewToken() เพื่อสร้าง token JWT โดยใส่ข้อมูล claims ลงไปใน token และส่ง token นั้นกลับไปยัง client โดยใช้เมธอด Ok()
+            var token = GenerateNewToken(authClaims);
+
+            return Ok(token);
+        }
+
+        private string GenerateNewToken(List<Claim> Claims)
+        {
+            //สร้างคีย์สำหรับการเข้ารหัสและถอดรหัส token โดยใช้ค่า Secret ที่กำหนดใน configuration (_configuration) ซึ่งเป็นค่าลับที่ใช้ในการเข้ารหัสข้อมูล
+            var authSecret = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
+
+            //สร้าง object JwtSecurityToken ที่เป็น token JWT
+            var tokenObject = new JwtSecurityToken(
+                issuer: _configuration["JWT:ValidIssuer"],
+                audience: _configuration["JWT:ValidAudience"],
+                expires: DateTime.Now.AddHours(1),
+                claims: Claims,
+                signingCredentials: new SigningCredentials(authSecret, SecurityAlgorithms.HmacSha256)
+            );
+
+            //เข้ารหัส object JwtSecurityToken เป็น string โดยใช้ JwtSecurityTokenHandler และเมธอด WriteToken() เพื่อให้ได้ token JWT ออกมาเป็น string
+            string token = new JwtSecurityTokenHandler().WriteToken(tokenObject);
+
+            return token;
         }
     }
 }
