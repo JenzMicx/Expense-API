@@ -31,6 +31,7 @@ namespace Auth_API.Controllers
             _configuration = configuration;
         }
 
+
         //สร้าง endpoint สำหรับการจัดการกับการสร้างบทบาทผู้ใช้ในระบบ
         [HttpPost]
         [Route("type-roles")]
@@ -51,6 +52,7 @@ namespace Auth_API.Controllers
             return Ok("Role Creating Done Succesfully");
 
         }
+
 
         //สร้าง endpoint สำหรับการ register 
         [HttpPost]
@@ -94,6 +96,7 @@ namespace Auth_API.Controllers
             return Ok("User Created Succesfully");
         }
 
+
         //สร้าง endpoint สำหรับการ login
         [HttpPost]
         [Route("login")]
@@ -131,6 +134,7 @@ namespace Auth_API.Controllers
 
             return Ok(token);
         }
+
 
         private string GenerateNewToken(List<Claim> Claims)
         {
