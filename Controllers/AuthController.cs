@@ -19,10 +19,13 @@ namespace Auth_API.Controllers
     [Route("[controller]")]
     public class AuthController : Controller
     {
+        #region Field
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
+        #endregion
 
+        #region DI
         //Dependency Injection สร้าง construstor ขึ้นมาเพื่อรับ dependency มาใช้งานใน class นี้
         public AuthController(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
         {
@@ -30,8 +33,34 @@ namespace Auth_API.Controllers
             _roleManager = roleManager;
             _configuration = configuration;
         }
+        #endregion
 
+        #region Method
+        //Method for this class
+        private string GenerateNewToken(List<Claim> Claims)
+        {
+            //สร้างคีย์สำหรับการเข้ารหัสและถอดรหัส token โดยใช้ค่า Secret ที่กำหนดใน configuration (_configuration) ซึ่งเป็นค่าลับที่ใช้ในการเข้ารหัสข้อมูล
+            var authSecret = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
 
+            //สร้าง object JwtSecurityToken ที่เป็น token JWT
+            var tokenObject = new JwtSecurityToken(
+                issuer: _configuration["JWT:ValidIssuer"],
+                audience: _configuration["JWT:ValidAudience"],
+                expires: DateTime.Now.AddHours(1),
+                claims: Claims,
+                signingCredentials: new SigningCredentials(authSecret, SecurityAlgorithms.HmacSha256)
+            );
+
+            //เข้ารหัส object JwtSecurityToken เป็น string โดยใช้ JwtSecurityTokenHandler และเมธอด WriteToken() เพื่อให้ได้ token JWT ออกมาเป็น string
+            string token = new JwtSecurityTokenHandler().WriteToken(tokenObject);
+
+            return token;
+        }
+        #endregion
+
+        #region Endpoint
+
+        #region Generate Roles
         //สร้าง endpoint สำหรับการจัดการกับการสร้างบทบาทผู้ใช้ในระบบ
         [HttpPost]
         [Route("type-roles")]
@@ -50,10 +79,10 @@ namespace Auth_API.Controllers
             await _roleManager.CreateAsync(new IdentityRole(UserRoles.ADMIN));
             await _roleManager.CreateAsync(new IdentityRole(UserRoles.OWNER));
             return Ok("Role Creating Done Succesfully");
-
         }
+        #endregion
 
-
+        #region Register
         //สร้าง endpoint สำหรับการ register 
         [HttpPost]
         [Route("register")]
@@ -95,65 +124,81 @@ namespace Auth_API.Controllers
             await _userManager.AddToRoleAsync(newUser, UserRoles.USER);
             return Ok("User Created Succesfully");
         }
+        #endregion
 
-
+        #region Login
         //สร้าง endpoint สำหรับการ login
         [HttpPost]
         [Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel loginModel)
         {
-
             //TODO_1 ค้นหาผู้ใช้จากชื่อผู้ใช้ที่ส่งมาใน loginModel ด้วย UserManager
             var userLogin = await _userManager.FindByNameAsync(loginModel.Username);
 
             //TODO_2 ตรวจสอบว่ามีผู้ใช้ที่เข้าสู่ระบบโดยใช้ชื่อผู้ใช้ที่รับมาหรือไม่
             if (userLogin is null)
             {
-                return Unauthorized("Invaild Credentials");
+                return Unauthorized("Invaild Credentials"); //Unauthorized คือเด้งออกไปละแสดง message
             }
 
             //TODO_3 เก็บ role ของผู้ใช้ที่เข้าสู่ระบบได้มาไว้ใน UserRoles เพื่อใช้ในการสร้าง claims ใน token
             var UserRoles = await _userManager.GetRolesAsync(userLogin);
 
-            //TODO_4 เมื่อได้รับบทบาทของผู้ใช้แล้ว เราก็เริ่มสร้างรายการของประกาศ (claims) ซึ่งจะใช้ในการสร้าง token JWT โดยใส่ข้อมูลต่างๆ เช่น ชื่อผู้ใช้, ไอดีผู้ใช้, และบทบาทลงไป
+            //TODO_4 เมื่อได้รับบทบาทของผู้ใช้แล้ว เราก็เริ่มสร้างรายการของ claims (information ที่อยู่ในส่วน payload ตอน Decoded) ซึ่งจะใช้ในการสร้าง token JWT โดยใส่ข้อมูลต่างๆ เช่น ชื่อผู้ใช้, ไอดีผู้ใช้, และบทบาทลงไป
             var authClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, userLogin.UserName),
-                new Claim(ClaimTypes.NameIdentifier, userLogin.Id),
-                new Claim("JWTID", Guid.NewGuid().ToString())
-            };
+                {
+                    new Claim(ClaimTypes.Name, userLogin.UserName),
+                    new Claim(ClaimTypes.NameIdentifier, userLogin.Id),
+                    new Claim("JWTID", Guid.NewGuid().ToString())
+                };
 
-            //TODO_5 เพิ่มข้อมูลบทบาท (Role claims) ลงในรายการของประกาศ (claims) เพื่อให้สามารถนำข้อมูลบทบาทมาใช้ในการสร้าง token JWT 
+            //TODO_4.1 เพิ่มข้อมูลบทบาท (Role claims) ลงในรายการของ claims (information ที่อยู่ในส่วน payload ตอน Decoded) เพื่อให้สามารถนำข้อมูลบทบาทมาใช้ในการสร้าง token JWT 
             foreach (var userRole in UserRoles)
             {
                 authClaims.Add(new Claim(ClaimTypes.Role, userRole));
             }
 
-            //TODO_6 เมื่อเรามีรายการของประกาศ (claims) ที่ครบถ้วนแล้ว เราก็ใช้เมธอด GenerateNewToken() เพื่อสร้าง token JWT โดยใส่ข้อมูล claims ลงไปใน token และส่ง token นั้นกลับไปยัง client โดยใช้เมธอด Ok()
+            //TODO_5 เมื่อเรามีรายการของประกาศ (claims) ที่ครบถ้วนแล้ว เราก็ใช้เมธอด GenerateNewToken() เพื่อสร้าง token JWT โดยใส่ข้อมูล claims ลงไปใน token และส่ง token นั้นกลับไปยัง client โดยใช้เมธอด Ok()
             var token = GenerateNewToken(authClaims);
 
             return Ok(token);
         }
+        #endregion
 
+        #region Add Roles to UserName
 
-        private string GenerateNewToken(List<Claim> Claims)
+        #region Add ADMIN Roles
+        [HttpPost]
+        [Route("addRoles-Admin")]
+        public async Task<IActionResult> AddRolesADMIN([FromBody] AddRolesModel addRolesModel)
         {
-            //สร้างคีย์สำหรับการเข้ารหัสและถอดรหัส token โดยใช้ค่า Secret ที่กำหนดใน configuration (_configuration) ซึ่งเป็นค่าลับที่ใช้ในการเข้ารหัสข้อมูล
-            var authSecret = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
-
-            //สร้าง object JwtSecurityToken ที่เป็น token JWT
-            var tokenObject = new JwtSecurityToken(
-                issuer: _configuration["JWT:ValidIssuer"],
-                audience: _configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddHours(1),
-                claims: Claims,
-                signingCredentials: new SigningCredentials(authSecret, SecurityAlgorithms.HmacSha256)
-            );
-
-            //เข้ารหัส object JwtSecurityToken เป็น string โดยใช้ JwtSecurityTokenHandler และเมธอด WriteToken() เพื่อให้ได้ token JWT ออกมาเป็น string
-            string token = new JwtSecurityTokenHandler().WriteToken(tokenObject);
-
-            return token;
+            var userLogin = await _userManager.FindByNameAsync(addRolesModel.Username);
+            if (userLogin is null)
+            {
+                return BadRequest("UserName IS NULL");
+            }
+            await _userManager.AddToRoleAsync(userLogin, UserRoles.ADMIN);
+            return Ok("Role: Add already 'ADMIN' roles");
         }
+        #endregion
+
+        #region Add OWNER Roles
+        [HttpPost]
+        [Route("addRoles-Owner")]
+        public async Task<IActionResult> AddRolesOWNER([FromBody] AddRolesModel addRolesModel)
+        {
+            var userLogin = await _userManager.FindByNameAsync(addRolesModel.Username);
+            if (userLogin is null)
+            {
+                return BadRequest("UserName IS NULL");
+            }
+            await _userManager.AddToRoleAsync(userLogin, UserRoles.OWNER);
+            return Ok("Role: Add already 'OWNER' roles");
+        }
+        #endregion
+
+        #endregion
+
+        #endregion
     }
 }
