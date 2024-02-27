@@ -7,6 +7,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Auth_API.Model;
+using Auth_API.Model.Entities;
 using Auth_API.Model.Other;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
@@ -19,15 +20,16 @@ namespace Auth_API.Controllers
     [Route("[controller]")]
     public class AuthController : Controller
     {
+        //Change IdentityUser เป็น AddUserFieldModel เพราะเราใช้ Model ใหม่ที่มีการเพิ่มค่าต่างๆไปแล้ว
         #region Field
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<AddUserFieldModel> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
         #endregion
 
         #region DI
         //Dependency Injection สร้าง construstor ขึ้นมาเพื่อรับ dependency มาใช้งานใน class นี้
-        public AuthController(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
+        public AuthController(UserManager<AddUserFieldModel> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -97,11 +99,14 @@ namespace Auth_API.Controllers
                 return BadRequest("Username Already Exists");
             }
 
-            //TODO_3 สร้าง instance ใหม่ของ IdentityUser ด้วยข้อมูลที่ client ส่งมาใน registerModel เพื่อทำการสร้างผู้ใช้ใหม่
-            IdentityUser newUser = new IdentityUser()
+            //TODO_3 สร้าง instance ใหม่ของ AddUserFieldModel ด้วยข้อมูลที่ client ส่งมาใน registerModel เพื่อทำการสร้างผู้ใช้ใหม่
+            AddUserFieldModel newUser = new AddUserFieldModel()
             {
-                Email = registerModel.Email,
+                FristName = registerModel.FristName,
+                LastName = registerModel.LastName,
                 UserName = registerModel.Username,
+                PhoneNumber = registerModel.PhoneNumber,
+                Email = registerModel.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
             };
 
@@ -185,7 +190,7 @@ namespace Auth_API.Controllers
         #region Add OWNER Roles
         [HttpPost]
         [Route("addRoles-Owner")]
-        public async Task<IActionResult> AddRolesOWNER([FromBody] AddRolesModel addRolesModel)
+        public async Task<IActionResult> AddRolesO([FromBody] AddRolesModel addRolesModel)
         {
             var userLogin = await _userManager.FindByNameAsync(addRolesModel.Username);
             if (userLogin is null)
