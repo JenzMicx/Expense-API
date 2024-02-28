@@ -2,6 +2,8 @@ using System.Net;
 using System.Text;
 using Auth_API.DbContext;
 using Auth_API.Model.Entities;
+using Auth_API.Services;
+using Auth_API.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -61,6 +63,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// Register services
+builder.Services.AddScoped<IAuthServices, AuthServices>();
 
 
 //pipeline
