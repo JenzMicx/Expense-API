@@ -105,8 +105,8 @@ namespace Auth_API.Controllers
                 FristName = registerModel.FristName,
                 LastName = registerModel.LastName,
                 UserName = registerModel.Username,
-                PhoneNumber = registerModel.PhoneNumber,
                 Email = registerModel.Email,
+                PhoneNumber = registerModel.Phone,
                 SecurityStamp = Guid.NewGuid().ToString(),
             };
 
