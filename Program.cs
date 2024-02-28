@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using Auth_API.DbContext;
+using Auth_API.Model.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +21,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 
 //Add Identity
-builder.Services.AddIdentity<IdentityUser, IdentityRole>() //ใช้ในการ DB ผู้ใช้และบทบาทใน Identity Framework
+builder.Services.AddIdentity<AddUserFieldModel, IdentityRole>() //ใช้ในการ DB ผู้ใช้และบทบาทใน Identity Framework
 .AddEntityFrameworkStores<ApplicationDbContext>() //ใช้ในการจัดการ DB ของ Identity Framework
 .AddDefaultTokenProviders(); //ใช้ในการจัดการ token 
 
@@ -33,7 +34,7 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireUppercase = false;
     options.Password.RequireNonAlphanumeric = true;  //อักษรพิเศษ
     options.SignIn.RequireConfirmedEmail = false; //ยืนยัน email ทุกครั้งที่ Sign In
-    // options.SignIn.RequireConfirmedPhoneNumber = true;
+    // options.SignIn.RequireConfirmedPhoneNumber = false;
 });
 
 //Add Authentication and JwtBearer
