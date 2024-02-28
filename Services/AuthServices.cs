@@ -114,7 +114,7 @@ namespace Auth_API.Services
                 };
             }
             //TODO_2.1 ตรวจสอบว่ารหัสผ่านที่ผู้ใช้ป้อนมา ตรงกับรหัสผ่านของผู้ใช้ที่กำลังล็อกอินอยู่หรือไม่
-            var isPasswordCorrect = await _userManager.CheckPasswordAsync(UserLogin, loginModel.Password);
+            var isPasswordCorrect = await _userManager.CheckPasswordAsync(userLogin, loginModel.Password);
             if (!isPasswordCorrect)
             {
                 //  return Unauthorized("Password incorrect");
