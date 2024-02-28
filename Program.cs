@@ -34,7 +34,7 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireUppercase = false;
     options.Password.RequireNonAlphanumeric = true;  //อักษรพิเศษ
     options.SignIn.RequireConfirmedEmail = false; //ยืนยัน email ทุกครั้งที่ Sign In
-    // options.SignIn.RequireConfirmedPhoneNumber = true;
+    // options.SignIn.RequireConfirmedPhoneNumber = false;
 });
 
 //Add Authentication and JwtBearer
