@@ -8,7 +8,7 @@ namespace Auth_API.Services.Interfaces
 {
     public interface IAuthServices
     {
-         Task<AuthServiceResponseModel> RolesTypesAsync();
+        Task<AuthServiceResponseModel> RolesTypesAsync();
         Task<AuthServiceResponseModel> RegisterAsync(RegisterModel registerModel);
         Task<AuthServiceResponseModel> LoginAsync(LoginModel loginModel);
         Task<AuthServiceResponseModel> AddRolesADMINAsync(AddRolesModel addRolesModel);
