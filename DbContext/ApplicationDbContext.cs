@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Auth_API.Model.Entities;
+using Auth_API.Model.Expenses;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,5 +11,6 @@ namespace Auth_API.DbContext
         {
 
         }
+        public DbSet<ExpenseModel> ExpenseDB {get; set;}
     }
 }
