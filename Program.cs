@@ -16,15 +16,21 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 //Add Database
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContext<AuthDbContext>(options =>
 {
-    var connectionString = builder.Configuration.GetConnectionString("local");
+    var connectionString = builder.Configuration.GetConnectionString("Authlocal");
+    options.UseSqlServer(connectionString);
+});
+
+builder.Services.AddDbContext<ExpenseDbContext>(options =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("Expenselocal");
     options.UseSqlServer(connectionString);
 });
 
 //Add Identity
 builder.Services.AddIdentity<AddUserFieldModel, IdentityRole>() //ใช้ในการ DB ผู้ใช้และบทบาทใน Identity Framework
-.AddEntityFrameworkStores<ApplicationDbContext>() //ใช้ในการจัดการ DB ของ Identity Framework
+.AddEntityFrameworkStores<AuthDbContext>() //ใช้ในการจัดการ DB ของ Identity Framework
 .AddDefaultTokenProviders(); //ใช้ในการจัดการ token 
 
 //Config Idenfity
