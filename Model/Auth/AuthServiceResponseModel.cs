@@ -8,6 +8,6 @@ namespace Auth_API.Model
     public class AuthServiceResponseModel
     {
         public bool iscomplete { get; set; }
-        public string messageStatus { get; set; }
+        public string? messageStatus { get; set; }
     }
 }
