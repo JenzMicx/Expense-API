@@ -4134,11 +4134,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Code\\Clone GIT\\Expense-App\\Backend\\Auth-API\\Auth-API.csproj",
+      "projectUniqueName": "D:\\Code\\Clone GIT\\Expense-App\\Backend\\Expense-API\\Auth-API.csproj",
       "projectName": "Auth-API",
-      "projectPath": "D:\\Code\\Clone GIT\\Expense-App\\Backend\\Auth-API\\Auth-API.csproj",
+      "projectPath": "D:\\Code\\Clone GIT\\Expense-App\\Backend\\Expense-API\\Auth-API.csproj",
       "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-      "outputPath": "D:\\Code\\Clone GIT\\Expense-App\\Backend\\Auth-API\\obj\\",
+      "outputPath": "D:\\Code\\Clone GIT\\Expense-App\\Backend\\Expense-API\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
