@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "lY2iaMD/Ghwqvv09fdr0mMsYv1/SWZWlpKcVQpVLN5VWZTMPlWqK1CMqYwilDzrRtB4sJF5s4ZK1t4giHY0EWw==",
+  "dgSpecHash": "MYdRLUxyUi09+fJvflaixR7DQT2vN5tufJj4HSJvUs8n3Ce1W0D8WJ4seKGtphIQPd5CKj1t4wFbjjoUJJZrdw==",
   "success": true,
-  "projectFilePath": "D:\\Code\\Clone GIT\\Expense-App\\Backend\\Auth-API\\Auth-API.csproj",
+  "projectFilePath": "D:\\Code\\Clone GIT\\Expense-App\\Backend\\Expense-API\\Auth-API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\User\\.nuget\\packages\\azure.core\\1.24.0\\azure.core.1.24.0.nupkg.sha512",
     "C:\\Users\\User\\.nuget\\packages\\azure.identity\\1.6.0\\azure.identity.1.6.0.nupkg.sha512",
