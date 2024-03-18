@@ -8,9 +8,9 @@ namespace Auth_API.Model.Expenses
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        public string Title { get; set; }
-        public string DateTime { get; set; }
+        public string? Title { get; set; }
+        public string? DateTime { get; set; }
         public double Amount { get; set; }
-        public string Category { get; set; }
+        public string? Category { get; set; }
     }
 }
