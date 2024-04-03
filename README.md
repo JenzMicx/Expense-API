@@ -14,3 +14,5 @@ dotnet ef database update  --context AuthDbContext
 API-URL: http://localhost:port/swagger/index.html *(port => your port)
 
 ![image](https://github.com/JenzMicx/Expense-API/assets/142468203/f79e6f00-c243-4d88-b96f-00167e0e7dbd)
+
+Learning from: https://www.youtube.com/watch?v=KRVjIgr-WOU&t=6205
